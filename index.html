@@ -1,0 +1,1845 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>مشغل الأسطوانة — Liquid Glass</title>
+  <meta name="description" content="مشغل أسطوانة فينيل بتصميم Liquid Glass مع تصدير فيديو سريع بمقاس 1:1." />
+  <meta name="theme-color" content="#090a0c" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="مشغل القرص" />
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+  <link rel="icon" type="image/svg+xml" href="./icon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Readex+Pro:wght@500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    :root {
+      --bg-dark: #090a0c;
+      --bg-mid: #14171c;
+      --glass-bg: rgba(255, 255, 255, 0.06);
+      --glass-bg-strong: rgba(255, 255, 255, 0.11);
+      --glass-border: rgba(255, 255, 255, 0.16);
+      --glass-highlight: rgba(255, 255, 255, 0.28);
+      --text-main: #f5f7fa;
+      --text-muted: #a3abb8;
+      --silver: #d4d8df;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "IBM Plex Sans Arabic", "Readex Pro", system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 20% 15%, rgba(220, 226, 236, 0.14), transparent 42%),
+        radial-gradient(circle at 80% 80%, rgba(150, 160, 175, 0.11), transparent 45%),
+        linear-gradient(160deg, var(--bg-dark), var(--bg-mid) 55%, #0c0e12);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom));
+      overflow-x: hidden;
+      overscroll-behavior: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .app-shell {
+      width: 100%;
+      max-width: 440px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(22px) saturate(140%);
+      -webkit-backdrop-filter: blur(22px) saturate(140%);
+      border: 1px solid var(--glass-border);
+      border-top-color: var(--glass-highlight);
+      border-radius: 28px;
+      padding: 22px 20px 18px;
+      box-shadow:
+        0 24px 60px rgba(0, 0, 0, 0.65),
+        inset 0 1px 0 rgba(255, 255, 255, 0.14);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .header-inputs {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .glass-input {
+      width: 100%;
+      background: rgba(10, 12, 16, 0.55);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 10px 14px;
+      color: var(--text-main);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .glass-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .glass-input:focus {
+      border-color: var(--silver);
+      background: rgba(20, 24, 30, 0.72);
+    }
+
+    .turntable-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 0;
+    }
+
+    .vinyl-stage {
+      position: relative;
+      width: 256px;
+      height: 256px;
+      aspect-ratio: 1 / 1;
+      border-radius: 50%;
+      padding: 9px;
+      background: linear-gradient(145deg, rgba(255,255,255,0.16), rgba(255,255,255,0.03));
+      border: 1px solid var(--glass-border);
+      box-shadow:
+        0 20px 46px rgba(0, 0, 0, 0.8),
+        inset 0 0 18px rgba(255, 255, 255, 0.08);
+    }
+
+    .vinyl-disc {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(
+          circle at center,
+          #0a0b0e 0%,
+          #0a0b0e 26%,
+          rgba(255, 255, 255, 0.045) 26.4%,
+          #07080b 27%,
+          #0b0d11 38%,
+          #06070a 38.6%,
+          #0f1217 48%,
+          #07080b 48.5%,
+          #0e1116 61%,
+          #06070a 61.5%,
+          #101319 73%,
+          #07080b 73.5%,
+          #0c0e13 94%,
+          #1b1f26 98%,
+          #07080a 100%
+        );
+      box-shadow:
+        inset 0 0 0 1.5px rgba(255, 255, 255, 0.14),
+        inset 0 0 14px rgba(0, 0, 0, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: spinDisc 5s linear infinite;
+      animation-play-state: paused;
+      will-change: transform;
+    }
+
+    .vinyl-disc.spinning {
+      animation-play-state: running;
+    }
+
+    @keyframes spinDisc {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .vinyl-cover {
+      width: 55%;
+      height: 55%;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid rgba(255, 255, 255, 0.22);
+      box-shadow:
+        0 0 0 3px rgba(0, 0, 0, 0.62),
+        inset 0 0 12px rgba(0, 0, 0, 0.35);
+      background: #e9e6de;
+      display: none;
+      position: relative;
+      z-index: 2;
+    }
+
+    .vinyl-cover.has-image {
+      display: block;
+    }
+
+    .vinyl-placeholder {
+      width: 42%;
+      height: 42%;
+      border-radius: 50%;
+      background: radial-gradient(circle at 42% 38%, #f5f3ee 0%, #ebe8e0 72%, #dcd8ce 100%);
+      border: 1px solid rgba(0, 0, 0, 0.35);
+      box-shadow:
+        0 0 0 3px rgba(0, 0, 0, 0.55),
+        inset 0 0 0 11px rgba(0, 0, 0, 0.025),
+        inset 0 0 0 12px rgba(0, 0, 0, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 10px;
+      font-size: 9.5px;
+      font-weight: 600;
+      line-height: 1.35;
+      color: rgba(24, 27, 34, 0.62);
+      position: relative;
+      z-index: 2;
+    }
+
+    .vinyl-cover.has-image + .vinyl-placeholder {
+      display: none;
+    }
+
+    .vinyl-grooves {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 1;
+      background:
+        repeating-radial-gradient(
+          circle at center,
+          transparent 0px,
+          transparent 1.4px,
+          rgba(255, 255, 255, 0.045) 1.8px,
+          transparent 2.4px
+        );
+      -webkit-mask-image: radial-gradient(circle at center, transparent 0%, transparent 21%, #000 22.5%, #000 98%, transparent 100%);
+      mask-image: radial-gradient(circle at center, transparent 0%, transparent 21%, #000 22.5%, #000 98%, transparent 100%);
+    }
+
+    .vinyl-stage.has-cover .vinyl-grooves {
+      -webkit-mask-image: radial-gradient(circle at center, transparent 0%, transparent 27.5%, #000 29%, #000 98%, transparent 100%);
+      mask-image: radial-gradient(circle at center, transparent 0%, transparent 27.5%, #000 29%, #000 98%, transparent 100%);
+    }
+
+    .vinyl-sheen {
+      position: absolute;
+      inset: 9px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 3;
+      background:
+        conic-gradient(
+          from 16deg at 50% 50%,
+          rgba(255, 255, 255, 0) 0deg,
+          rgba(220, 228, 240, 0.08) 18deg,
+          rgba(255, 255, 255, 0.28) 32deg,
+          rgba(230, 238, 248, 0.14) 46deg,
+          rgba(255, 255, 255, 0.02) 64deg,
+          rgba(255, 255, 255, 0) 110deg,
+          rgba(200, 212, 230, 0.04) 142deg,
+          rgba(255, 255, 255, 0) 178deg,
+          rgba(220, 228, 240, 0.09) 198deg,
+          rgba(255, 255, 255, 0.3) 214deg,
+          rgba(230, 238, 248, 0.14) 228deg,
+          rgba(255, 255, 255, 0.02) 246deg,
+          rgba(255, 255, 255, 0) 295deg,
+          rgba(200, 212, 230, 0.04) 328deg,
+          rgba(255, 255, 255, 0) 360deg
+        );
+      -webkit-mask-image: radial-gradient(circle at center, transparent 0%, transparent 21%, #000 22%, #000 98%, transparent 100%);
+      mask-image: radial-gradient(circle at center, transparent 0%, transparent 21%, #000 22%, #000 98%, transparent 100%);
+    }
+
+    .vinyl-stage.has-cover .vinyl-sheen {
+      -webkit-mask-image: radial-gradient(circle at center, transparent 0%, transparent 27.5%, #000 28.5%, #000 98%, transparent 100%);
+      mask-image: radial-gradient(circle at center, transparent 0%, transparent 27.5%, #000 28.5%, #000 98%, transparent 100%);
+    }
+
+    .spindle-hole {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 40% 35%, #191d24 0%, #090a0d 70%);
+      border: 1.5px solid rgba(110, 118, 132, 0.72);
+      box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.45),
+        inset 0 1px 2px rgba(0, 0, 0, 0.9);
+      z-index: 4;
+      pointer-events: none;
+    }
+
+    .display-titles {
+      text-align: center;
+      min-height: 44px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .title-main {
+      font-family: "Readex Pro", "IBM Plex Sans Arabic", sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text-main);
+      word-break: break-word;
+      letter-spacing: 0;
+    }
+
+    .title-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      word-break: break-word;
+    }
+
+    .controls-panel {
+      background: rgba(12, 14, 18, 0.45);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .progress-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      color: var(--silver);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .progress-bar {
+      flex: 1;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #9aa3b2, #f5f7fa);
+      transition: width 0.15s linear;
+    }
+
+    .action-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .glass-btn {
+      flex: 1;
+      padding: 11px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--glass-border);
+      background: var(--glass-bg-strong);
+      color: var(--text-main);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s, background 0.2s, border-color 0.2s;
+      text-align: center;
+    }
+
+    .glass-btn:hover {
+      background: rgba(255, 255, 255, 0.17);
+      border-color: var(--silver);
+    }
+
+    .glass-btn:active {
+      transform: scale(0.98);
+    }
+
+    .glass-btn.primary {
+      background: linear-gradient(135deg, rgba(255,255,255,0.24), rgba(180,188,200,0.12));
+      border-color: rgba(255, 255, 255, 0.35);
+    }
+
+    .glass-btn.download {
+      width: 100%;
+      background: linear-gradient(135deg, rgba(212,216,223,0.24), rgba(255,255,255,0.07));
+      border-color: rgba(255, 255, 255, 0.32);
+    }
+
+    .glass-btn.recording {
+      border-color: #f5f7fa;
+      background: rgba(255, 255, 255, 0.28);
+    }
+
+    .mode-toggle {
+      display: flex;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 3px;
+      gap: 4px;
+    }
+
+    .mode-btn {
+      flex: 1;
+      padding: 7px 8px;
+      border: none;
+      border-radius: 9px;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .mode-btn.active {
+      background: rgba(255, 255, 255, 0.18);
+      color: var(--text-main);
+    }
+
+    .range-box {
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      padding: 10px;
+    }
+
+    .range-box.active {
+      display: flex;
+    }
+
+    .range-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .range-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .range-input {
+      width: 100%;
+      background: rgba(10, 12, 16, 0.65);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      padding: 7px 10px;
+      color: var(--text-main);
+      font-size: 13px;
+      outline: none;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .range-input:focus {
+      border-color: var(--silver);
+    }
+
+    .loop-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 8px 12px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .loop-label {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--silver);
+      user-select: none;
+    }
+
+    .switch-btn {
+      position: relative;
+      width: 46px;
+      height: 26px;
+      border-radius: 999px;
+      border: 1px solid var(--glass-border);
+      background: rgba(255, 255, 255, 0.1);
+      cursor: pointer;
+      padding: 0;
+      flex-shrink: 0;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .switch-btn[aria-checked="true"] {
+      background: rgba(245, 247, 250, 0.88);
+      border-color: #f5f7fa;
+    }
+
+    .switch-thumb {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #f5f7fa;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s;
+    }
+
+    .switch-btn[aria-checked="true"] .switch-thumb {
+      transform: translateX(20px);
+      background: #090a0c;
+    }
+
+    .upload-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .upload-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--glass-border);
+      color: var(--silver);
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+      text-align: center;
+    }
+
+    .upload-label:hover {
+      background: rgba(255, 255, 255, 0.13);
+      border-color: var(--silver);
+    }
+
+    .status-note {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      text-align: center;
+      min-height: 16px;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .footer-credit {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      padding-top: 4px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .footer-credit a {
+      color: var(--silver);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .footer-credit a:hover {
+      text-decoration: underline;
+    }
+
+    .install-wrap {
+      display: none;
+    }
+
+    .install-wrap.visible {
+      display: flex;
+    }
+
+    .ios-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      background: rgba(5, 6, 8, 0.72);
+      backdrop-filter: blur(10px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .ios-modal.open {
+      display: flex;
+    }
+
+    .ios-modal-card {
+      width: 100%;
+      max-width: 340px;
+      background: rgba(20, 24, 30, 0.94);
+      border: 1px solid var(--glass-border);
+      border-radius: 22px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      text-align: center;
+    }
+
+    .ios-modal-title {
+      font-family: "Readex Pro", "IBM Plex Sans Arabic", sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .ios-modal-body {
+      font-size: 13px;
+      line-height: 1.65;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <section class="header-inputs">
+      <input
+        type="text"
+        id="mainTitleInput"
+        class="glass-input"
+        placeholder="اكتب العنوان (اختياري)"
+        autocomplete="off"
+      />
+      <input
+        type="text"
+        id="subTitleInput"
+        class="glass-input"
+        placeholder="اكتب عنواناً فرعياً أو ملاحظة (اختياري)"
+        autocomplete="off"
+      />
+    </section>
+
+    <section class="turntable-wrap">
+      <div id="vinylStage" class="vinyl-stage">
+        <div id="vinylDisc" class="vinyl-disc">
+          <img id="vinylCover" class="vinyl-cover" alt="غلاف الأسطوانة" />
+          <div class="vinyl-placeholder">ارفع صورة الغلاف</div>
+          <div class="vinyl-grooves"></div>
+        </div>
+        <div class="vinyl-sheen"></div>
+        <div class="spindle-hole"></div>
+      </div>
+
+      <div class="display-titles">
+        <div id="displayMain" class="title-main"></div>
+        <div id="displaySub" class="title-sub"></div>
+      </div>
+    </section>
+
+    <section class="controls-panel">
+      <div class="mode-toggle">
+        <button type="button" id="modeOneMin" class="mode-btn active">دقيقة (01:00)</button>
+        <button type="button" id="modeFull" class="mode-btn">كامل المقطع</button>
+        <button type="button" id="modeCustom" class="mode-btn">تحديد وقت</button>
+      </div>
+
+      <div id="customRangeBox" class="range-box">
+        <div class="range-grid">
+          <label class="range-field">
+            البداية (مثال: 0:30 أو 2:15)
+            <input type="text" id="startSecInput" class="range-input" value="00:00" placeholder="00:00" />
+          </label>
+          <label class="range-field">
+            النهاية (مثال: 2:15)
+            <input type="text" id="endSecInput" class="range-input" value="01:00" placeholder="02:15" />
+          </label>
+        </div>
+      </div>
+
+      <div class="progress-row">
+        <span id="currentTimeText">00:00</span>
+        <div class="progress-bar">
+          <div id="progressFill" class="progress-fill"></div>
+        </div>
+        <span id="targetTimeText">01:00</span>
+      </div>
+
+      <div class="loop-row">
+        <span class="loop-label">تكرار المقطع (Loop)</span>
+        <button
+          type="button"
+          id="loopToggleBtn"
+          class="switch-btn"
+          role="switch"
+          aria-checked="false"
+          aria-label="تفعيل أو إيقاف تكرار المقطع"
+        >
+          <span class="switch-thumb"></span>
+        </button>
+      </div>
+
+      <div class="action-row">
+        <button type="button" id="playToggleBtn" class="glass-btn primary">تشغيل</button>
+        <button type="button" id="resetBtn" class="glass-btn">إعادة</button>
+      </div>
+
+      <button type="button" id="downloadVideoBtn" class="glass-btn download">تحميل فيديو</button>
+      <div id="statusNote" class="status-note"></div>
+
+      <div class="upload-grid">
+        <label class="upload-label" for="imageInput">
+          اختيار صورة
+          <input type="file" id="imageInput" accept="image/*" />
+        </label>
+        <label class="upload-label" for="audioInput">
+          اختيار صوت
+          <input type="file" id="audioInput" accept="audio/*" />
+        </label>
+      </div>
+      <div id="installWrap" class="install-wrap">
+        <button type="button" id="installAppBtn" class="glass-btn">تثبيت كتطبيق على الجهاز</button>
+      </div>
+    </section>
+
+    <audio id="audioPlayer" preload="metadata"></audio>
+
+    <footer class="footer-credit">
+      الحقوق والتواصل: <a href="https://t.me/xleeix" target="_blank" rel="noopener noreferrer">@xleeix</a>
+    </footer>
+  </main>
+
+  <div id="iosInstallModal" class="ios-modal" role="dialog" aria-modal="true" aria-labelledby="iosModalTitle">
+    <div class="ios-modal-card">
+      <div id="iosModalTitle" class="ios-modal-title">تثبيت التطبيق على الآيفون والآيباد</div>
+      <div class="ios-modal-body">
+        1. اضغط على زر <strong>المشاركة (Share)</strong> في شريط Safari.<br />
+        2. اختر <strong>إضافة إلى الشاشة الرئيسية (Add to Home Screen)</strong>.
+      </div>
+      <button type="button" id="closeIosModalBtn" class="glass-btn primary">حسناً</button>
+    </div>
+  </div>
+
+  <script>
+    const mainTitleInput = document.getElementById("mainTitleInput");
+    const subTitleInput = document.getElementById("subTitleInput");
+    const displayMain = document.getElementById("displayMain");
+    const displaySub = document.getElementById("displaySub");
+
+    const vinylStage = document.getElementById("vinylStage");
+    const vinylDisc = document.getElementById("vinylDisc");
+    const vinylCover = document.getElementById("vinylCover");
+    const imageInput = document.getElementById("imageInput");
+    const audioInput = document.getElementById("audioInput");
+    const audioPlayer = document.getElementById("audioPlayer");
+
+    const playToggleBtn = document.getElementById("playToggleBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const loopToggleBtn = document.getElementById("loopToggleBtn");
+    const downloadVideoBtn = document.getElementById("downloadVideoBtn");
+    const statusNote = document.getElementById("statusNote");
+    const modeOneMin = document.getElementById("modeOneMin");
+    const modeFull = document.getElementById("modeFull");
+    const modeCustom = document.getElementById("modeCustom");
+    const customRangeBox = document.getElementById("customRangeBox");
+    const startSecInput = document.getElementById("startSecInput");
+    const endSecInput = document.getElementById("endSecInput");
+
+    const currentTimeText = document.getElementById("currentTimeText");
+    const targetTimeText = document.getElementById("targetTimeText");
+    const progressFill = document.getElementById("progressFill");
+
+    let playMode = "onemin";
+    let isPlaying = false;
+    let isLoopEnabled = false;
+    let isExporting = false;
+    let exportAbortRequested = false;
+    let exportAbortController = null;
+    let simTime = 0;
+    let lastTick = null;
+    let rafId = null;
+
+    let coverImgObj = null;
+    let uploadedAudioFile = null;
+    let currentAudioObjectUrl = null;
+    let decodedAudioCache = null;
+
+    function formatTime(sec) {
+      const safe = Math.max(0, Math.floor(sec));
+      const m = Math.floor(safe / 60);
+      const s = safe % 60;
+      return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    }
+
+    function parseTimeInput(rawVal, fallbackSec = 0) {
+      const str = String(rawVal || "").trim();
+      if (!str) return fallbackSec;
+      if (str.includes(":")) {
+        const parts = str.split(":");
+        const mins = Math.max(0, Number(parts[0]) || 0);
+        const secs = Math.max(0, Number(parts[1]) || 0);
+        return mins * 60 + secs;
+      }
+      const num = Number(str);
+      return Number.isFinite(num) && num >= 0 ? num : fallbackSec;
+    }
+
+    function hasLoadedAudio() {
+      return Boolean(audioPlayer.src && !audioPlayer.error && audioPlayer.readyState >= 1);
+    }
+
+    function getAudioDuration() {
+      if (hasLoadedAudio() && Number.isFinite(audioPlayer.duration) && audioPlayer.duration > 0) {
+        return audioPlayer.duration;
+      }
+      return 300;
+    }
+
+    function getRangeWindow() {
+      const dur = getAudioDuration();
+      if (playMode === "onemin") {
+        const start = 0;
+        const end = hasLoadedAudio() ? Math.min(60, dur) : 60;
+        return { start, end: Math.max(start + 1, end) };
+      }
+
+      if (playMode === "full") {
+        const start = 0;
+        const end = hasLoadedAudio() ? dur : 60;
+        return { start, end: Math.max(start + 1, end) };
+      }
+
+      const rawStart = parseTimeInput(startSecInput.value, 0);
+      const rawEnd = parseTimeInput(endSecInput.value, rawStart + 60);
+      const maxCap = hasLoadedAudio() ? dur : Math.max(rawEnd, rawStart + 60);
+      const start = Math.min(rawStart, Math.max(0, maxCap - 1));
+      const end = Math.max(start + 1, Math.min(rawEnd, maxCap));
+      return { start, end };
+    }
+
+    function updateTitles() {
+      displayMain.textContent = mainTitleInput.value.trim();
+      displaySub.textContent = subTitleInput.value.trim();
+    }
+
+    mainTitleInput.addEventListener("input", updateTitles);
+    subTitleInput.addEventListener("input", updateTitles);
+    updateTitles();
+
+    imageInput.addEventListener("change", (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        vinylCover.src = reader.result;
+        vinylCover.classList.add("has-image");
+        vinylStage.classList.add("has-cover");
+        const img = new Image();
+        img.onload = () => { coverImgObj = img; };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    audioInput.addEventListener("change", (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      uploadedAudioFile = file;
+      decodedAudioCache = null;
+      if (currentAudioObjectUrl) {
+        URL.revokeObjectURL(currentAudioObjectUrl);
+      }
+      currentAudioObjectUrl = URL.createObjectURL(file);
+      audioPlayer.src = currentAudioObjectUrl;
+      const { start } = getRangeWindow();
+      audioPlayer.currentTime = start;
+      simTime = start;
+      updateUiFromTime(start);
+    });
+
+    audioPlayer.addEventListener("loadedmetadata", () => {
+      const dur = Math.floor(audioPlayer.duration);
+      if (Number.isFinite(dur) && dur > 0 && playMode === "custom") {
+        const currentEnd = parseTimeInput(endSecInput.value, 60);
+        if (currentEnd > dur) {
+          endSecInput.value = formatTime(dur);
+        }
+      }
+      const { start } = getRangeWindow();
+      updateUiFromTime(start);
+    });
+
+    function setMode(nextMode) {
+      playMode = nextMode;
+      modeOneMin.classList.toggle("active", nextMode === "onemin");
+      modeFull.classList.toggle("active", nextMode === "full");
+      modeCustom.classList.toggle("active", nextMode === "custom");
+      customRangeBox.classList.toggle("active", nextMode === "custom");
+
+      const { start, end } = getRangeWindow();
+      if (hasLoadedAudio()) {
+        audioPlayer.currentTime = start;
+      }
+      simTime = start;
+      updateUiFromTime(start);
+      targetTimeText.textContent = formatTime(end);
+    }
+
+    modeOneMin.addEventListener("click", () => setMode("onemin"));
+    modeFull.addEventListener("click", () => setMode("full"));
+    modeCustom.addEventListener("click", () => setMode("custom"));
+
+    function handleCustomRangeChange() {
+      const { start, end } = getRangeWindow();
+      if (!isPlaying) {
+        if (hasLoadedAudio()) {
+          audioPlayer.currentTime = start;
+        }
+        simTime = start;
+        updateUiFromTime(start);
+      }
+      targetTimeText.textContent = formatTime(end);
+    }
+
+    startSecInput.addEventListener("input", handleCustomRangeChange);
+    endSecInput.addEventListener("input", handleCustomRangeChange);
+
+    startSecInput.addEventListener("blur", () => {
+      startSecInput.value = formatTime(parseTimeInput(startSecInput.value, 0));
+      handleCustomRangeChange();
+    });
+
+    endSecInput.addEventListener("blur", () => {
+      endSecInput.value = formatTime(parseTimeInput(endSecInput.value, 60));
+      handleCustomRangeChange();
+    });
+
+    function updateUiFromTime(nowSec) {
+      const { start, end } = getRangeWindow();
+      const clamped = Math.max(start, Math.min(nowSec, end));
+      const span = Math.max(0.001, end - start);
+      const pct = Math.min(100, Math.max(0, ((clamped - start) / span) * 100));
+
+      currentTimeText.textContent = formatTime(clamped);
+      targetTimeText.textContent = formatTime(end);
+      progressFill.style.width = `${pct}%`;
+    }
+
+    function yieldMs(ms = 0) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    function canvasToPngBlob(canvas) {
+      return new Promise((resolve, reject) => {
+        canvas.toBlob((blob) => {
+          if (blob) resolve(blob);
+          else reject(new Error("Canvas toBlob failed"));
+        }, "image/png");
+      });
+    }
+
+    function triggerBlobDownload(blob, filename) {
+      const dlUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = dlUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(dlUrl), 5000);
+    }
+
+    let chimeAudioCtx = null;
+
+    function unlockChimeAudio() {
+      try {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+        if (!chimeAudioCtx) {
+          chimeAudioCtx = new AudioContextClass();
+        }
+        if (chimeAudioCtx.state === "suspended") {
+          chimeAudioCtx.resume().catch(() => {});
+        }
+      } catch (_) {}
+    }
+
+    function playExportSuccessChime() {
+      try {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+        if (!chimeAudioCtx) {
+          chimeAudioCtx = new AudioContextClass();
+        }
+        if (chimeAudioCtx.state === "suspended") {
+          chimeAudioCtx.resume().catch(() => {});
+        }
+
+        const now = chimeAudioCtx.currentTime;
+        const notes = [
+          { freq: 783.99, delay: 0, dur: 0.24, gain: 0.08 },
+          { freq: 1046.5, delay: 0.09, dur: 0.38, gain: 0.11 },
+        ];
+
+        for (const n of notes) {
+          const osc = chimeAudioCtx.createOscillator();
+          const gainNode = chimeAudioCtx.createGain();
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(n.freq, now + n.delay);
+
+          gainNode.gain.setValueAtTime(0.0001, now + n.delay);
+          gainNode.gain.exponentialRampToValueAtTime(n.gain, now + n.delay + 0.018);
+          gainNode.gain.exponentialRampToValueAtTime(0.0001, now + n.delay + n.dur);
+
+          osc.connect(gainNode);
+          gainNode.connect(chimeAudioCtx.destination);
+
+          osc.start(now + n.delay);
+          osc.stop(now + n.delay + n.dur + 0.02);
+        }
+      } catch (_) {}
+    }
+
+    function buildStaticBackgroundCanvas() {
+      const size = 1080;
+      const cx = size / 2;
+      const cy = size / 2 - 36;
+      const discR = 350;
+
+      const canvas = document.createElement("canvas");
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext("2d");
+
+      const bgGrad = ctx.createRadialGradient(cx, cy, 40, cx, cy, size * 0.75);
+      bgGrad.addColorStop(0, "#1b2029");
+      bgGrad.addColorStop(0.6, "#0f1217");
+      bgGrad.addColorStop(1, "#07080b");
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, size, size);
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, discR + 12, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(0, 0, 0, 0.45)";
+      ctx.fill();
+
+      const mainText = mainTitleInput.value.trim();
+      const subText = subTitleInput.value.trim();
+      ctx.textAlign = "center";
+
+      if (mainText) {
+        ctx.fillStyle = "#f5f7fa";
+        ctx.font = "700 42px 'Readex Pro', 'IBM Plex Sans Arabic', sans-serif";
+        ctx.fillText(mainText, cx, cy + discR + 72);
+      }
+      if (subText) {
+        ctx.fillStyle = "#a3abb8";
+        ctx.font = "500 26px 'IBM Plex Sans Arabic', sans-serif";
+        ctx.fillText(subText, cx, cy + discR + 116);
+      }
+
+      return canvas;
+    }
+
+    function buildVinylDiscCanvas() {
+      const boxSize = 720;
+      const discR = 350;
+      const hasCover = Boolean(coverImgObj);
+      const labelR = hasCover ? 192 : 147;
+
+      const canvas = document.createElement("canvas");
+      canvas.width = boxSize;
+      canvas.height = boxSize;
+      const ctx = canvas.getContext("2d");
+
+      ctx.save();
+      ctx.translate(boxSize / 2, boxSize / 2);
+
+      // Rich black vinyl base with subtle track-band tonal shifts
+      const baseGrad = ctx.createRadialGradient(0, 0, labelR, 0, 0, discR);
+      baseGrad.addColorStop(0, "#08090c");
+      baseGrad.addColorStop(0.16, "#0d0f14");
+      baseGrad.addColorStop(0.18, "#050608");
+      baseGrad.addColorStop(0.45, "#0f1217");
+      baseGrad.addColorStop(0.47, "#060709");
+      baseGrad.addColorStop(0.74, "#10131a");
+      baseGrad.addColorStop(0.76, "#060709");
+      baseGrad.addColorStop(0.96, "#0d0f14");
+      baseGrad.addColorStop(0.985, "#1f242c");
+      baseGrad.addColorStop(1, "#07080b");
+
+      ctx.beginPath();
+      ctx.arc(0, 0, discR, 0, Math.PI * 2);
+      ctx.fillStyle = baseGrad;
+      ctx.fill();
+
+      // Subtle outer rim highlight
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.16)";
+      ctx.stroke();
+
+      // Fine lead-in grooves near outer edge
+      for (let r = discR - 10; r <= discR - 3; r += 2) {
+        ctx.beginPath();
+        ctx.arc(0, 0, r, 0, Math.PI * 2);
+        ctx.lineWidth = 0.8;
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+        ctx.stroke();
+      }
+
+      // Ultra-fine concentric micro-grooves across playable area
+      const grooveStart = hasCover ? labelR + 22 : labelR + 34;
+      const trackGaps = new Set(hasCover ? [242, 282, 318] : [224, 272, 314]);
+      for (let r = grooveStart; r < discR - 11; r += 2.5) {
+        ctx.beginPath();
+        ctx.arc(0, 0, r, 0, Math.PI * 2);
+        const nearGap = trackGaps.has(Math.round(r));
+        ctx.lineWidth = nearGap ? 2.2 : 0.9;
+        ctx.strokeStyle = nearGap
+          ? "rgba(0, 0, 0, 0.72)"
+          : r % 5 === 0
+            ? "rgba(255, 255, 255, 0.055)"
+            : "rgba(255, 255, 255, 0.025)";
+        ctx.stroke();
+      }
+
+      // Dead-wax run-out groove ring
+      ctx.beginPath();
+      ctx.arc(0, 0, labelR + (hasCover ? 11 : 18), 0, Math.PI * 2);
+      ctx.lineWidth = 1.2;
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.07)";
+      ctx.stroke();
+
+      // Center label (55% when cover image uploaded, 42% classic ivory label when empty)
+      ctx.beginPath();
+      ctx.arc(0, 0, labelR, 0, Math.PI * 2);
+      ctx.save();
+      ctx.clip();
+
+      if (coverImgObj) {
+        const diam = labelR * 2;
+        const iw = coverImgObj.width;
+        const ih = coverImgObj.height;
+        const scale = Math.max(diam / iw, diam / ih);
+        const dw = iw * scale;
+        const dh = ih * scale;
+        ctx.drawImage(coverImgObj, -dw / 2, -dh / 2, dw, dh);
+      } else {
+        const paperGrad = ctx.createRadialGradient(-18, -18, 12, 0, 0, labelR);
+        paperGrad.addColorStop(0, "#f5f3ee");
+        paperGrad.addColorStop(0.74, "#ebe8e0");
+        paperGrad.addColorStop(1, "#dcd8ce");
+        ctx.fillStyle = paperGrad;
+        ctx.fillRect(-labelR, -labelR, labelR * 2, labelR * 2);
+
+        // Embossed outer pressing ring on matte label
+        ctx.beginPath();
+        ctx.arc(0, 0, labelR - 16, 0, Math.PI * 2);
+        ctx.lineWidth = 1.6;
+        ctx.strokeStyle = "rgba(0, 0, 0, 0.075)";
+        ctx.stroke();
+
+        // Inner pressing indentation ring
+        ctx.beginPath();
+        ctx.arc(0, 0, 68, 0, Math.PI * 2);
+        ctx.lineWidth = 1.8;
+        ctx.strokeStyle = "rgba(0, 0, 0, 0.09)";
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // Crisp label edge ring
+      ctx.beginPath();
+      ctx.arc(0, 0, labelR, 0, Math.PI * 2);
+      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = hasCover ? "rgba(255, 255, 255, 0.24)" : "rgba(0, 0, 0, 0.55)";
+      ctx.stroke();
+
+      // Center spindle hole
+      ctx.beginPath();
+      ctx.arc(0, 0, 13, 0, Math.PI * 2);
+      ctx.fillStyle = "#090a0d";
+      ctx.fill();
+      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = "rgba(120, 128, 142, 0.78)";
+      ctx.stroke();
+
+      ctx.restore();
+      return canvas;
+    }
+
+    function buildVinylSheenCanvas() {
+      const boxSize = 720;
+      const discR = 350;
+      const labelR = coverImgObj ? 193 : 148;
+
+      const canvas = document.createElement("canvas");
+      canvas.width = boxSize;
+      canvas.height = boxSize;
+      const ctx = canvas.getContext("2d");
+
+      ctx.save();
+      ctx.translate(boxSize / 2, boxSize / 2);
+
+      // Mask to only the vinyl groove ring (keep matte center label crisp)
+      ctx.beginPath();
+      ctx.arc(0, 0, discR, 0, Math.PI * 2);
+      ctx.arc(0, 0, labelR, 0, Math.PI * 2, true);
+      ctx.clip();
+
+      if (typeof ctx.createConicGradient === "function") {
+        const conic = ctx.createConicGradient(-0.98, 0, 0);
+        conic.addColorStop(0.0, "rgba(255, 255, 255, 0)");
+        conic.addColorStop(0.05, "rgba(220, 228, 242, 0.09)");
+        conic.addColorStop(0.09, "rgba(255, 255, 255, 0.3)");
+        conic.addColorStop(0.13, "rgba(225, 234, 248, 0.13)");
+        conic.addColorStop(0.18, "rgba(255, 255, 255, 0.02)");
+        conic.addColorStop(0.32, "rgba(255, 255, 255, 0)");
+        conic.addColorStop(0.41, "rgba(200, 212, 232, 0.045)");
+        conic.addColorStop(0.5, "rgba(255, 255, 255, 0)");
+        conic.addColorStop(0.55, "rgba(220, 228, 242, 0.09)");
+        conic.addColorStop(0.59, "rgba(255, 255, 255, 0.31)");
+        conic.addColorStop(0.63, "rgba(225, 234, 248, 0.13)");
+        conic.addColorStop(0.68, "rgba(255, 255, 255, 0.02)");
+        conic.addColorStop(0.84, "rgba(255, 255, 255, 0)");
+        conic.addColorStop(0.91, "rgba(200, 212, 232, 0.04)");
+        conic.addColorStop(1.0, "rgba(255, 255, 255, 0)");
+
+        ctx.fillStyle = conic;
+        ctx.fillRect(-discR, -discR, discR * 2, discR * 2);
+      } else {
+        const lin = ctx.createLinearGradient(-discR, -discR, discR, discR);
+        lin.addColorStop(0.35, "rgba(255,255,255,0)");
+        lin.addColorStop(0.5, "rgba(255,255,255,0.18)");
+        lin.addColorStop(0.65, "rgba(255,255,255,0)");
+        ctx.fillStyle = lin;
+        ctx.fillRect(-discR, -discR, discR * 2, discR * 2);
+      }
+
+      ctx.restore();
+      return canvas;
+    }
+
+    async function getDecodedAudioBuffer() {
+      if (!uploadedAudioFile) return null;
+      if (decodedAudioCache && decodedAudioCache.file === uploadedAudioFile) {
+        return decodedAudioCache.buffer;
+      }
+      const arrBuf = await uploadedAudioFile.arrayBuffer();
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) throw new Error("AudioContext unsupported");
+      const tmpCtx = new AudioContextClass();
+      try {
+        const decoded = await tmpCtx.decodeAudioData(arrBuf);
+        decodedAudioCache = { file: uploadedAudioFile, buffer: decoded };
+        return decoded;
+      } finally {
+        tmpCtx.close().catch(() => {});
+      }
+    }
+
+    async function sliceAndResampleAudio(decodedBuffer, startSec, durationSec, channels, targetSampleRate) {
+      const totalSamples = Math.max(1, Math.floor(durationSec * targetSampleRate));
+      const offlineCtx = new OfflineAudioContext(channels, totalSamples, targetSampleRate);
+      const source = offlineCtx.createBufferSource();
+      source.buffer = decodedBuffer;
+      source.connect(offlineCtx.destination);
+      const safeStart = Math.max(0, Math.min(startSec, Math.max(0, decodedBuffer.duration - 0.05)));
+      source.start(0, safeStart, durationSec);
+      return offlineCtx.startRendering();
+    }
+
+    async function selectWebCodecsProfile(hasAudio, channels) {
+      if (typeof VideoEncoder !== "function" || typeof VideoFrame !== "function") {
+        return null;
+      }
+      if (hasAudio && (typeof AudioEncoder !== "function" || typeof AudioData !== "function")) {
+        return null;
+      }
+
+      const tryVideoConfigs = async (candidates) => {
+        for (const candidate of candidates) {
+          for (const accel of ["prefer-hardware", "no-preference"]) {
+            const cfg = {
+              codec: candidate.codec,
+              width: 1080,
+              height: 1080,
+              bitrate: 5_000_000,
+              framerate: 30,
+              hardwareAcceleration: accel,
+            };
+            try {
+              const res = await VideoEncoder.isConfigSupported(cfg);
+              if (res && res.supported) {
+                return { encoderConfig: res.config || cfg, muxerCodec: candidate.muxerCodec };
+              }
+            } catch (_) {}
+          }
+        }
+        return null;
+      };
+
+      const tryAudioConfigs = async (candidates) => {
+        for (const candidate of candidates) {
+          const cfg = {
+            codec: candidate.codec,
+            numberOfChannels: channels,
+            sampleRate: candidate.sampleRate,
+            bitrate: 128_000,
+          };
+          try {
+            const res = await AudioEncoder.isConfigSupported(cfg);
+            if (res && res.supported) {
+              return { encoderConfig: res.config || cfg, muxerCodec: candidate.muxerCodec };
+            }
+          } catch (_) {}
+        }
+        return null;
+      };
+
+      const mp4Video = await tryVideoConfigs([
+        { codec: "avc1.4d002a", muxerCodec: "avc" },
+        { codec: "avc1.42002a", muxerCodec: "avc" },
+        { codec: "avc1.64002a", muxerCodec: "avc" },
+        { codec: "avc1.4d0028", muxerCodec: "avc" },
+        { codec: "avc1.420028", muxerCodec: "avc" },
+      ]);
+
+      if (mp4Video) {
+        if (!hasAudio) {
+          return { format: "mp4", video: mp4Video, audio: null };
+        }
+        const mp4Audio = await tryAudioConfigs([
+          { codec: "mp4a.40.2", sampleRate: 48000, muxerCodec: "aac" },
+          { codec: "mp4a.40.2", sampleRate: 44100, muxerCodec: "aac" },
+          { codec: "opus", sampleRate: 48000, muxerCodec: "opus" },
+        ]);
+        if (mp4Audio) {
+          return { format: "mp4", video: mp4Video, audio: mp4Audio };
+        }
+      }
+
+      const webmVideo = await tryVideoConfigs([
+        { codec: "vp09.00.10.08", muxerCodec: "V_VP9" },
+        { codec: "vp8", muxerCodec: "V_VP8" },
+      ]);
+
+      if (webmVideo) {
+        if (!hasAudio) {
+          return { format: "webm", video: webmVideo, audio: null };
+        }
+        const webmAudio = await tryAudioConfigs([
+          { codec: "opus", sampleRate: 48000, muxerCodec: "A_OPUS" },
+        ]);
+        if (webmAudio) {
+          return { format: "webm", video: webmVideo, audio: webmAudio };
+        }
+      }
+
+      return null;
+    }
+
+    async function exportWithWebCodecs(bgCanvas, discCanvas, sheenCanvas, startSec, durationSec) {
+      const hasAudio = Boolean(uploadedAudioFile);
+      let decodedAudio = null;
+      let channels = 2;
+
+      if (hasAudio) {
+        statusNote.textContent = "جارٍ قراءة الصوت...";
+        decodedAudio = await getDecodedAudioBuffer();
+        channels = Math.min(2, Math.max(1, decodedAudio.numberOfChannels || 2));
+      }
+
+      const profile = await selectWebCodecsProfile(hasAudio, channels);
+      if (!profile) {
+        return false;
+      }
+
+      let muxer;
+      let target;
+
+      if (profile.format === "mp4") {
+        let Mp4Muxer;
+        try {
+          Mp4Muxer = await import("./vendor/mp4-muxer.mjs");
+        } catch (_) {
+          Mp4Muxer = await import("https://cdn.jsdelivr.net/npm/mp4-muxer@5.2.2/build/mp4-muxer.mjs");
+        }
+        target = new Mp4Muxer.ArrayBufferTarget();
+        muxer = new Mp4Muxer.Muxer({
+          target,
+          video: {
+            codec: profile.video.muxerCodec,
+            width: 1080,
+            height: 1080,
+            frameRate: 30,
+          },
+          audio: profile.audio
+            ? {
+                codec: profile.audio.muxerCodec,
+                numberOfChannels: channels,
+                sampleRate: profile.audio.encoderConfig.sampleRate,
+              }
+            : undefined,
+          fastStart: "in-memory",
+        });
+      } else {
+        let WebmMuxer;
+        try {
+          WebmMuxer = await import("./vendor/webm-muxer.mjs");
+        } catch (_) {
+          WebmMuxer = await import("https://cdn.jsdelivr.net/npm/webm-muxer@5.1.4/build/webm-muxer.mjs");
+        }
+        target = new WebmMuxer.ArrayBufferTarget();
+        muxer = new WebmMuxer.Muxer({
+          target,
+          video: {
+            codec: profile.video.muxerCodec,
+            width: 1080,
+            height: 1080,
+            frameRate: 30,
+          },
+          audio: profile.audio
+            ? {
+                codec: profile.audio.muxerCodec,
+                numberOfChannels: channels,
+                sampleRate: profile.audio.encoderConfig.sampleRate,
+              }
+            : undefined,
+        });
+      }
+
+      let encoderError = null;
+      const videoEncoder = new VideoEncoder({
+        output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
+        error: (err) => {
+          encoderError = err;
+        },
+      });
+      videoEncoder.configure(profile.video.encoderConfig);
+
+      let audioEncoder = null;
+      if (profile.audio && decodedAudio) {
+        audioEncoder = new AudioEncoder({
+          output: (chunk, meta) => muxer.addAudioChunk(chunk, meta),
+          error: (err) => {
+            encoderError = err;
+          },
+        });
+        audioEncoder.configure(profile.audio.encoderConfig);
+      }
+
+      try {
+        if (audioEncoder && decodedAudio) {
+          statusNote.textContent = "جارٍ ترميز الصوت...";
+          const targetRate = profile.audio.encoderConfig.sampleRate;
+          const slicedBuffer = await sliceAndResampleAudio(
+            decodedAudio,
+            startSec,
+            durationSec,
+            channels,
+            targetRate
+          );
+          const totalSamples = slicedBuffer.length;
+          const chunkFrames = 4096;
+
+          for (let offset = 0; offset < totalSamples; offset += chunkFrames) {
+            if (exportAbortRequested) throw new DOMException("Aborted", "AbortError");
+            if (encoderError) throw encoderError;
+
+            const count = Math.min(chunkFrames, totalSamples - offset);
+            const planar = new Float32Array(count * channels);
+            for (let ch = 0; ch < channels; ch++) {
+              const channelData = slicedBuffer.getChannelData(ch);
+              planar.set(channelData.subarray(offset, offset + count), ch * count);
+            }
+
+            const audioData = new AudioData({
+              format: "f32-planar",
+              sampleRate: targetRate,
+              numberOfFrames: count,
+              numberOfChannels: channels,
+              timestamp: Math.round((offset / targetRate) * 1_000_000),
+              data: planar,
+            });
+
+            audioEncoder.encode(audioData);
+            audioData.close();
+
+            while (audioEncoder.encodeQueueSize > 16 && !exportAbortRequested && !encoderError) {
+              await yieldMs(2);
+            }
+          }
+          await audioEncoder.flush();
+          if (encoderError) throw encoderError;
+        }
+
+        const fps = 30;
+        const totalFrames = Math.max(1, Math.round(durationSec * fps));
+        const frameDurationUs = Math.round(1_000_000 / fps);
+
+        const renderCanvas = document.createElement("canvas");
+        renderCanvas.width = 1080;
+        renderCanvas.height = 1080;
+        const renderCtx = renderCanvas.getContext("2d", { alpha: false });
+
+        const cx = 540;
+        const cy = 504;
+
+        for (let f = 0; f < totalFrames; f++) {
+          if (exportAbortRequested) throw new DOMException("Aborted", "AbortError");
+          if (encoderError) throw encoderError;
+
+          const t = f / fps;
+          const angleRad = (((t * 72) % 360) * Math.PI) / 180;
+
+          renderCtx.drawImage(bgCanvas, 0, 0);
+          renderCtx.save();
+          renderCtx.translate(cx, cy);
+          renderCtx.rotate(angleRad);
+          renderCtx.drawImage(discCanvas, -discCanvas.width / 2, -discCanvas.height / 2);
+          renderCtx.restore();
+          renderCtx.drawImage(sheenCanvas, cx - sheenCanvas.width / 2, cy - sheenCanvas.height / 2);
+
+          const frame = new VideoFrame(renderCanvas, {
+            timestamp: Math.round((f / fps) * 1_000_000),
+            duration: frameDurationUs,
+          });
+
+          videoEncoder.encode(frame, { keyFrame: f % 60 === 0 });
+          frame.close();
+
+          while (videoEncoder.encodeQueueSize > 6 && !exportAbortRequested && !encoderError) {
+            await yieldMs(4);
+          }
+
+          if (f % 4 === 0 || f === totalFrames - 1) {
+            const pct = Math.round(((f + 1) / totalFrames) * 100);
+            statusNote.textContent = `جارٍ تصدير الفيديو... ${pct}%`;
+            progressFill.style.width = `${pct}%`;
+            await yieldMs(0);
+          }
+        }
+
+        if (exportAbortRequested) throw new DOMException("Aborted", "AbortError");
+        await videoEncoder.flush();
+        if (encoderError) throw encoderError;
+
+        muxer.finalize();
+
+        const mimeType = profile.format === "mp4" ? "video/mp4" : "video/webm";
+        const ext = profile.format === "mp4" ? "mp4" : "webm";
+        const blob = new Blob([target.buffer], { type: mimeType });
+        triggerBlobDownload(blob, `vinyl-disc-1x1.${ext}`);
+        return true;
+      } finally {
+        try {
+          if (videoEncoder.state !== "closed") videoEncoder.close();
+        } catch (_) {}
+        try {
+          if (audioEncoder && audioEncoder.state !== "closed") audioEncoder.close();
+        } catch (_) {}
+      }
+    }
+
+    async function exportWithServerFfmpeg(bgCanvas, discCanvas, sheenCanvas, startSec, durationSec, signal) {
+      statusNote.textContent = "جارٍ تجهيز الفيديو بسرعة عبر الخادم...";
+      progressFill.style.width = "35%";
+
+      const [bgBlob, discBlob, sheenBlob] = await Promise.all([
+        canvasToPngBlob(bgCanvas),
+        canvasToPngBlob(discCanvas),
+        canvasToPngBlob(sheenCanvas),
+      ]);
+
+      const formData = new FormData();
+      formData.append("bgImage", bgBlob, "bg.png");
+      formData.append("discImage", discBlob, "disc.png");
+      formData.append("sheenImage", sheenBlob, "sheen.png");
+      formData.append("startSec", String(startSec));
+      formData.append("durationSec", String(durationSec));
+      if (uploadedAudioFile) {
+        formData.append("audio", uploadedAudioFile, uploadedAudioFile.name || "audio");
+      }
+
+      const res = await fetch("./api/export-video", {
+        method: "POST",
+        body: formData,
+        signal,
+      });
+
+      if (!res.ok) {
+        throw new Error(`Server export failed (${res.status})`);
+      }
+
+      progressFill.style.width = "85%";
+      const videoBlob = await res.blob();
+      progressFill.style.width = "100%";
+      triggerBlobDownload(videoBlob, "vinyl-disc-1x1.mp4");
+    }
+
+    async function startFastVideoExport() {
+      if (isExporting) {
+        exportAbortRequested = true;
+        if (exportAbortController) {
+          exportAbortController.abort();
+        }
+        return;
+      }
+
+      unlockChimeAudio();
+
+      if (isPlaying) {
+        stopPlayback(false);
+      }
+
+      isExporting = true;
+      exportAbortRequested = false;
+      exportAbortController = new AbortController();
+      downloadVideoBtn.classList.add("recording");
+      downloadVideoBtn.textContent = "إلغاء التصدير";
+      statusNote.textContent = "جارٍ تحضير الفيديو...";
+
+      try {
+        if (document.fonts && document.fonts.ready) {
+          await Promise.race([document.fonts.ready, yieldMs(1200)]);
+        }
+        const { start, end } = getRangeWindow();
+        const durationSec = Math.max(1, end - start);
+        const bgCanvas = buildStaticBackgroundCanvas();
+        const discCanvas = buildVinylDiscCanvas();
+        const sheenCanvas = buildVinylSheenCanvas();
+
+        let exported = false;
+        try {
+          exported = await exportWithWebCodecs(bgCanvas, discCanvas, sheenCanvas, start, durationSec);
+        } catch (err) {
+          if (err && err.name === "AbortError") throw err;
+          exported = false;
+        }
+
+        if (!exported) {
+          if (exportAbortRequested) throw new DOMException("Aborted", "AbortError");
+          await exportWithServerFfmpeg(
+            bgCanvas,
+            discCanvas,
+            sheenCanvas,
+            start,
+            durationSec,
+            exportAbortController.signal
+          );
+        }
+
+        playExportSuccessChime();
+        statusNote.textContent = "تم تنزيل الفيديو السريع بمقاس 1:1.";
+      } catch (err) {
+        if (err && err.name === "AbortError") {
+          statusNote.textContent = "تم إلغاء التصدير.";
+        } else {
+          statusNote.textContent = "تعذر تصدير الفيديو. تأكد من سلامة الملفات وحاول مجدداً.";
+        }
+      } finally {
+        isExporting = false;
+        exportAbortRequested = false;
+        exportAbortController = null;
+        downloadVideoBtn.classList.remove("recording");
+        downloadVideoBtn.textContent = "تحميل فيديو";
+        const currentSec = hasLoadedAudio() ? audioPlayer.currentTime : simTime;
+        updateUiFromTime(currentSec);
+      }
+    }
+
+    function stopPlayback(resetToStart = false) {
+      isPlaying = false;
+      vinylDisc.classList.remove("spinning");
+      playToggleBtn.textContent = "تشغيل";
+      lastTick = null;
+
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+
+      if (audioPlayer.src) {
+        audioPlayer.pause();
+      }
+
+      if (resetToStart) {
+        const { start } = getRangeWindow();
+        if (hasLoadedAudio()) {
+          audioPlayer.currentTime = start;
+        }
+        simTime = start;
+        updateUiFromTime(start);
+      }
+    }
+
+    function loop(now) {
+      if (!isPlaying) return;
+      if (lastTick === null) lastTick = now;
+      const dt = (now - lastTick) / 1000;
+      lastTick = now;
+
+      const { end } = getRangeWindow();
+      let currentSec = simTime;
+
+      if (hasLoadedAudio()) {
+        currentSec = audioPlayer.currentTime;
+      } else {
+        simTime += dt;
+        currentSec = simTime;
+      }
+
+      if (currentSec >= end || (hasLoadedAudio() && audioPlayer.ended)) {
+        if (isLoopEnabled) {
+          const { start } = getRangeWindow();
+          if (hasLoadedAudio()) {
+            audioPlayer.currentTime = start;
+            if (audioPlayer.paused) {
+              audioPlayer.play().catch(() => {});
+            }
+          }
+          simTime = start;
+          lastTick = now;
+          updateUiFromTime(start);
+          rafId = requestAnimationFrame(loop);
+          return;
+        }
+        updateUiFromTime(end);
+        stopPlayback(true);
+        return;
+      }
+
+      updateUiFromTime(currentSec);
+      rafId = requestAnimationFrame(loop);
+    }
+
+    async function startPlayback() {
+      if (isPlaying) {
+        stopPlayback(false);
+        return;
+      }
+
+      const { start, end } = getRangeWindow();
+      let initialSec = hasLoadedAudio() ? audioPlayer.currentTime : simTime;
+
+      if (initialSec < start || initialSec >= end) {
+        initialSec = start;
+        simTime = start;
+        if (hasLoadedAudio()) {
+          audioPlayer.currentTime = start;
+        }
+      }
+
+      isPlaying = true;
+      vinylDisc.classList.add("spinning");
+      playToggleBtn.textContent = "إيقاف";
+      lastTick = null;
+      updateUiFromTime(initialSec);
+
+      if (audioPlayer.src) {
+        try {
+          await audioPlayer.play();
+        } catch (_) {
+          // Keep disc spinning and timer running if browser blocks autoplay audio
+        }
+      }
+
+      rafId = requestAnimationFrame(loop);
+    }
+
+    loopToggleBtn.addEventListener("click", () => {
+      isLoopEnabled = !isLoopEnabled;
+      loopToggleBtn.setAttribute("aria-checked", isLoopEnabled ? "true" : "false");
+    });
+
+    playToggleBtn.addEventListener("click", () => startPlayback());
+    downloadVideoBtn.addEventListener("click", () => startFastVideoExport());
+
+    resetBtn.addEventListener("click", () => {
+      stopPlayback(true);
+    });
+
+    const installWrap = document.getElementById("installWrap");
+    const installAppBtn = document.getElementById("installAppBtn");
+    const iosInstallModal = document.getElementById("iosInstallModal");
+    const closeIosModalBtn = document.getElementById("closeIosModalBtn");
+    let deferredInstallPrompt = null;
+
+    const isStandaloneApp =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      window.navigator.standalone === true ||
+      Boolean(window.Capacitor);
+    const isIosBrowser = /iphone|ipad|ipod/i.test(window.navigator.userAgent || "");
+
+    if (!isStandaloneApp && isIosBrowser) {
+      installWrap.classList.add("visible");
+    }
+
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      if (!isStandaloneApp) {
+        installWrap.classList.add("visible");
+      }
+    });
+
+    window.addEventListener("appinstalled", () => {
+      deferredInstallPrompt = null;
+      installWrap.classList.remove("visible");
+    });
+
+    installAppBtn.addEventListener("click", async () => {
+      if (deferredInstallPrompt) {
+        await deferredInstallPrompt.prompt();
+        const choice = await deferredInstallPrompt.userChoice;
+        if (choice && choice.outcome === "accepted") {
+          installWrap.classList.remove("visible");
+        }
+        deferredInstallPrompt = null;
+      } else if (isIosBrowser) {
+        iosInstallModal.classList.add("open");
+      }
+    });
+
+    closeIosModalBtn.addEventListener("click", () => {
+      iosInstallModal.classList.remove("open");
+    });
+
+    iosInstallModal.addEventListener("click", (e) => {
+      if (e.target === iosInstallModal) {
+        iosInstallModal.classList.remove("open");
+      }
+    });
+
+    if ("serviceWorker" in navigator && !window.Capacitor) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js").catch(() => {});
+      });
+    }
+
+    setMode("onemin");
+  </script>
+</body>
+</html>

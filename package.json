@@ -1,0 +1,19 @@
+{
+  "name": "music-disc",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "prepare:www": "node scripts/prepare-www.mjs",
+    "build": "node --check server.js && node scripts/prepare-www.mjs",
+    "lint": "node --check server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "mp4-muxer": "^5.2.2",
+    "multer": "^2.5.0",
+    "webm-muxer": "^5.1.4"
+  }
+}
